@@ -27,6 +27,7 @@
           @toggle="toggleBook(book.id)"
           @delete="deleteBook(book.id)"
           @rate="rateBook(book.id, $event)"
+          @toggle-favorite="toggleFavorite(book.id)"
         />
       </div>
     </main>
@@ -34,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, compile } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AddBookForm from './components/AddBookForm.vue';
 import BookCard from './components/BookCard.vue';
 import BookFilters from './components/BookFilters.vue';
@@ -54,7 +55,7 @@ const searchQuery = ref('');
 
 // Сохранение изменений
 watch(books, (newBooks) => {
-  localStorage.setItem('books', JSON.stringify(newBooks))
+  localStorage.setItem('books', JSON.stringify(newBooks));
 }, { deep: true });
 
 // Добавление книги
@@ -63,52 +64,62 @@ const addBook = (bookData) => {
     id: Date.now(),
     ...bookData,
     completed: false,
-    rating: 0
-  }
-  books.value.push(newBook)
-}
+    rating: 0,
+    favorite: false,
+  };
+  books.value.push(newBook);
+};
 
 // Переключение статуса
 const toggleBook = (id) => {
-  const book = books.value.find(b => b.id === id)
+  const book = books.value.find(b => b.id === id);
   if (book) {
-    book.completed = !book.completed
+    book.completed = !book.completed;
     if (!book.completed) {
-      book.rating = 0
+      book.rating = 0;
     }
   }
-}
+};
 
 // Оценка книги
 const rateBook = (id, rating) => {
-  const book = books.value.find(b => b.id === id)
+  const book = books.value.find(b => b.id === id);
   if (book && book.completed) {
-    book.rating = rating
+    book.rating = rating;
   }
-}
+};
 
 // Удаление книги
 const deleteBook = (id) => {
   if (confirm('Удалить книгу?')) {
-    books.value = books.value.filter(b => b.id !== id)
+    books.value = books.value.filter(b => b.id !== id);
   }
-}
+};
+
+// Отметка избранных книг
+const toggleFavorite = (id) => {
+  const book = books.value.find(b => b.id === id);
+  if (book) {
+    book.favorite = !book.favorite;
+  }
+};
 
 // Фильтрация и поиск книг
 const filteredBooks = computed(() => {
   return books.value
     .filter(book => {
-      if (currentFilter.value === 'unread') return !book.completed
-      if (currentFilter.value === 'read') return book.completed
-      return true
+      if (currentFilter.value === 'unread') return !book.completed;
+      if (currentFilter.value === 'read') return book.completed;
+      if (currentFilter.value === 'favorite') return book.favorite;
+      return true;
     })
     .filter(book => {
-      if (!searchQuery.value) return true
-      const query = searchQuery.value.toLowerCase()
+      if (!searchQuery.value) return true;
+      const query = searchQuery.value.toLowerCase();
       return book.title.toLowerCase().includes(query) ||
-             book.author.toLowerCase().includes(query)
-    })
-})
+             book.author.toLowerCase().includes(query);
+    });
+});
 </script>
 
 <style>

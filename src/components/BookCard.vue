@@ -7,6 +7,14 @@
     </div>
 
     <div class="book-actions">
+      <button
+        @click="$emit('toggle-favorite')"
+        class="favorite-btn"
+      >
+        {{ book.favorite ? '♥' : '♡' }}
+    </button>
+
+
       <div v-if="book.completed" class="rating">
         <span
           v-for="star in 5"
@@ -32,11 +40,26 @@
 </template>
 
 <script setup>
-defineProps(['book'])
-defineEmits(['toggle', 'delete', 'rate'])
+defineProps(['book']);
+defineEmits(['toggle', 'delete', 'rate', 'toggle-favorite']);
 </script>
 
 <style scoped>
+.favorite-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #e91e63;
+  transition: transform 0.2s;
+  line-height: 1;
+  padding: 0 5px;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.2);
+}
+
 .book-card {
   background: white;
   border-radius: 8px;
